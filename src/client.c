@@ -69,6 +69,8 @@ int startClient()
         WSACleanup();
         return 1;
     }
+        
+    printf("client: sending data...\n");
 
     if ((status = shutdown(connectSock, SD_SEND)) == SOCKET_ERROR) {
         printf("shutdown failed with error: %d\n", WSAGetLastError());
@@ -76,6 +78,8 @@ int startClient()
         WSACleanup();
         return 1;
     }
+
+    printf("client: data sent, shuting down...\n");
 
     closesocket(connectSock);
     WSACleanup();

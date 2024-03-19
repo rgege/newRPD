@@ -97,13 +97,15 @@ int startServer(void) {
     closesocket(listenSock);
 
     char recvbuf[MAXDATASIZE];
+    int bufsize;
     int recvbuflen = MAXDATASIZE;
     int byte_count = 0;
 
     do {
 
-        if ((byte_count = recv(clientSock, recvbuf, recvbuflen, 0)) > 0 )
+        if ((byte_count = recv(clientSock, recvbuf, recvbuflen, 0)) > 0 ) {
             printf("server: bytes received: %d\n", byte_count);
+        }
         else if (byte_count == 0)
             printf("server: connection closing...\n");
         else {
