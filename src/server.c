@@ -9,8 +9,6 @@
 #define MAXCONN 20
 #define MAXDATASIZE 1024
 
-WSAData wsa;
-int status;
 
 void *get_in_addr(struct sockaddr *sa)
 {
@@ -18,6 +16,9 @@ void *get_in_addr(struct sockaddr *sa)
 }
 
 int startServer(void) {
+
+    WSADATA wsa;
+    int status;
 
     /* WinSock initialization */
     if ((status = WSAStartup(MAKEWORD(2, 2), &wsa)) != 0)
