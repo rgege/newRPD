@@ -133,11 +133,3 @@ int startServer(void) {
 
     return 0;
 }
-
-int main()
-{
-
-    printf("starting server to listen on port: %s\n", PORT);
-    startServer();
-    return 0;
-}

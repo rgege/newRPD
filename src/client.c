@@ -5,10 +5,12 @@
 #include <ws2tcpip.h>
 #include <stdio.h>
 
+#include "client.h"
+
 #define BUFLEN 1024
 #define PORT "3333"
 
-int startClient()
+int startClient(char *sendBuff)
 {
     WSADATA wsa;
     int status;
@@ -62,7 +64,7 @@ int startClient()
     }
 
     /*sending data to server*/
-    const char *sendBuff = "err was here!";
+    /*const char *sendBuff = "err was here!";*/
     if ((status = send(connectSock, sendBuff, (int)sizeof sendBuff, 0)) == SOCKET_ERROR) {
         printf("send failed with error: %d\n", WSAGetLastError());
         closesocket(connectSock);
@@ -84,11 +86,5 @@ int startClient()
     closesocket(connectSock);
     WSACleanup();
 
-    return 0;
-}
-
-int main()
-{
-    startClient();
     return 0;
 }

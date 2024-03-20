@@ -3,17 +3,10 @@
 
 #define IDC_STATUS 1001
 #define ID_TIMER   5001
-
-#define MAX_POS 10
+#define ID_FILE_START 9001
+#define ID_FILE_EXIT 9009
 
 const char g_szClassName[] = "windowClass";
-
-POINT g_curPos;
-
-char *ptos(POINT *p, char b[]) {
-    wsprintf(b, TEXT("%d::%d\n"), p->x, p->y, MAX_POS);
-    return b;
-}
 
 /*window procedure*/
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -22,18 +15,29 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
         case WM_CREATE:
         {
-            int ret;
-            if ((ret = SetTimer(hwnd, ID_TIMER, 30, NULL) == 0))
-               MessageBox(hwnd, "Could not SetTimer()!", "Error", MB_OK | MB_ICONEXCLAMATION);
+            HMENU hMenu, hSubMenu;
+
+            hMenu = CreateMenu();
+            hSubMenu = CreatePopupMenu();
+            AppendMenu(hSubMenu, MF_STRING | MF_POPUP, ID_FILE_START, "Start");
+            AppendMenu(hSubMenu, MF_STRING | MF_POPUP, ID_FILE_EXIT, "Exit");
+            AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT_PTR)hSubMenu, "File");
+            SetMenu(hwnd, hMenu);
         }
         break;
-        case WM_TIMER:
-        {
-            GetCursorPos(&g_curPos);  
-            char szBuff[MAX_POS];
-            HWND hstat = GetDlgItem(hwnd, IDC_STATUS);
-            SendMessage(hstat, SB_SETTEXT, 0, (LPARAM)ptos(&g_curPos, szBuff));
-        }
+        case WM_COMMAND:
+            switch(LOWORD(wParam))
+            {
+                case ID_FILE_START:
+                {
+                    HWND hstat = GetDlgItem(hwnd, IDC_STATUS);
+                    SendMessage(hstat, SB_SETTEXT, 0, (LPARAM)"starting to listen on port 3333 ...");
+                }
+                break;
+                case ID_FILE_EXIT:
+                    PostMessage(hwnd, WM_CLOSE, 0, 0);
+                break;
+            }
         break;
         case WM_CLOSE:
             DestroyWindow(hwnd);
@@ -79,7 +83,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     hwnd = CreateWindowEx(
         WS_EX_CLIENTEDGE,
         g_szClassName,
-        "newRPD",
+        "Server",
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, 340, 220,
         NULL, NULL, hInstance, NULL);
@@ -94,6 +98,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     hstatus = CreateWindowEx(0, STATUSCLASSNAME, NULL,
         WS_CHILD | WS_VISIBLE, 0, 0, 0, 0,
         hwnd, (HMENU)IDC_STATUS, GetModuleHandle(NULL), NULL);
+
+    int statwidths[] = {200, -1};
+    SendMessage(hstatus, SB_SETPARTS, sizeof(statwidths)/sizeof(int), (LPARAM)statwidths);
 
     ShowWindow(hwnd, nCmdShow);
     UpdateWindow(hwnd);
