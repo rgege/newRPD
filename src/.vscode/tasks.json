@@ -10,6 +10,7 @@
                 "${file}",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "-lgdi32",
                 "-lws2_32"
             ],
             "options": {
