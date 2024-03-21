@@ -5,8 +5,6 @@
 #include <ws2tcpip.h>
 #include <stdio.h>
 
-#include "client.h"
-
 #define BUFLEN 1024
 #define PORT "3333"
 

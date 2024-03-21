@@ -1,18 +1,37 @@
 #include <windows.h>
 #include <commctrl.h>
+#include <stdio.h>
 
-#define IDC_STATUS 1001
-#define ID_TIMER   5001
-#define ID_FILE_START 9001
-#define ID_FILE_EXIT 9009
+#include "server.h"
 
+SOCKET listenSock = INVALID_SOCKET;
 const char g_szClassName[] = "windowClass";
 
 /*window procedure*/
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+    
+    SOCKET clientSOCK = INVALID_SOCKET;
     switch(msg)
     {
+        case ID_WINSOCK:
+            switch(LOWORD(lParam))
+            {
+                case FD_ACCEPT:
+                {
+                    acceptConnection(hwnd, ID_WINSOCK);
+                    HWND hstat = GetDlgItem(hwnd, IDC_STATUS);
+                    SendMessage(hstat, SB_SETTEXT, 0, (LPARAM)"got connection ...");
+                }
+                break;
+                case FD_CLOSE:
+                {
+                    HWND hstat = GetDlgItem(hwnd, IDC_STATUS);
+                    SendMessage(hstat, SB_SETTEXT, 0, (LPARAM)"connection closed ...");
+                }
+                break;
+            }
+        break;
         case WM_CREATE:
         {
             HMENU hMenu, hSubMenu;
@@ -31,7 +50,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 case ID_FILE_START:
                 {
                     HWND hstat = GetDlgItem(hwnd, IDC_STATUS);
-                    SendMessage(hstat, SB_SETTEXT, 0, (LPARAM)"starting to listen on port 3333 ...");
+                    SendMessage(hstat, SB_SETTEXT, 0, (LPARAM)"waiting for connection ...");
+                    startServer(hwnd, ID_WINSOCK);
                 }
                 break;
                 case ID_FILE_EXIT:
@@ -51,9 +71,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-    LPSTR lpCmdLine, int nCmdShow)
+int main()
 {
+    HINSTANCE hInstance = GetModuleHandle(0);
     WNDCLASSEX wc;
     HWND hwnd, hstatus;
     MSG Msg;
@@ -102,7 +122,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     int statwidths[] = {200, -1};
     SendMessage(hstatus, SB_SETPARTS, sizeof(statwidths)/sizeof(int), (LPARAM)statwidths);
 
-    ShowWindow(hwnd, nCmdShow);
+    ShowWindow(hwnd, 1);
     UpdateWindow(hwnd);
 
     /*message loop*/ 

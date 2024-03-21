@@ -5,17 +5,20 @@
 #include <ws2tcpip.h>
 #include <stdio.h>
 
+#include "server.h"
+
 #define PORT "3333"
 #define MAXCONN 20
 #define MAXDATASIZE 1024
 
+extern SOCKET listenSock;
 
 void *get_in_addr(struct sockaddr *sa)
 {
     return &(((struct sockaddr_in*)sa)->sin_addr);
 }
 
-int startServer(void) {
+int startServer(HWND hwnd, int id) {
 
     WSADATA wsa;
     int status;
@@ -35,19 +38,14 @@ int startServer(void) {
     hints.ai_flags = AI_PASSIVE;
 
     /*resolving server address and port*/
-    if ((status = getaddrinfo(NULL, PORT, &hints, &res)) != 0)
-    {
+    if ((status = getaddrinfo(NULL, PORT, &hints, &res)) != 0) {
         printf("getaddrinfo failed with error: %d\n", status);
         WSACleanup();
         return 1;
     }
 
-    SOCKET listenSock = INVALID_SOCKET;
-    SOCKET clientSock = INVALID_SOCKET;
-
     /*creating socket for server to listen for connections*/
-    if ((listenSock = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) == INVALID_SOCKET)
-    {
+    if ((listenSock = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) == INVALID_SOCKET) {
         printf("socket failed with error: %d\n", WSAGetLastError());
         freeaddrinfo(res);
         WSACleanup();
@@ -55,8 +53,7 @@ int startServer(void) {
     }
 
     /*setup TCP listening socket*/
-    if ((status = bind(listenSock, res->ai_addr, res->ai_addrlen)) == SOCKET_ERROR)
-    {
+    if ((status = bind(listenSock, res->ai_addr, res->ai_addrlen)) == SOCKET_ERROR) {
         printf("bind failed with error: %d\n", WSAGetLastError());
         freeaddrinfo(res);
         closesocket(listenSock);
@@ -74,13 +71,24 @@ int startServer(void) {
         return 1;
     }
 
-    printf("server: waiting for connections...\n");
-    
+    if ((status = WSAAsyncSelect(listenSock, hwnd, id, FD_ACCEPT|FD_CLOSE|FD_READ|FD_WRITE)) == SOCKET_ERROR) {
+        printf("WSAAsyncSelect failed with error: %d\n", WSAGetLastError());
+        closesocket(listenSock);
+        WSACleanup();
+        return 1;
+    }
+
+    printf("server: waiting for connections...\n"); 
+    return 0;
+}
+
+int acceptConnection(HWND hwnd, int id)
+{
     struct sockaddr_storage their_addr;
-    socklen_t sin_size;
-    sin_size = sizeof their_addr;
+    socklen_t sin_size = sizeof their_addr;
 
     /*accepting client socket*/
+    SOCKET clientSock = INVALID_SOCKET;
     if ((clientSock = accept(listenSock, (struct sockaddr*)&their_addr, &sin_size)) == INVALID_SOCKET) {
         printf("accept failed with error: %d\n", WSAGetLastError());
         closesocket(listenSock);
@@ -95,7 +103,9 @@ int startServer(void) {
         printf("server: got connection from %s\n", szBuff);
 
     closesocket(listenSock);
-
+    return 0;
+}
+    /*
     char recvbuf[MAXDATASIZE];
     int bufsize;
     int recvbuflen = MAXDATASIZE;
@@ -118,7 +128,7 @@ int startServer(void) {
 
     } while (byte_count > 0);
 
-    /*shutting down the connection*/
+    /*shutting down the connection
     if ((status = shutdown(clientSock, SD_SEND)) == SOCKET_ERROR) {
         printf("shutdown failed with error: %d\n", WSAGetLastError());
         closesocket(clientSock);
@@ -129,7 +139,4 @@ int startServer(void) {
     printf("server: shutting down...\n");
 
     closesocket(clientSock);
-    WSACleanup();
-
-    return 0;
-}
+    WSACleanup(); */
