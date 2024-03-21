@@ -4,12 +4,9 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "server.h"
-
-#define PORT "3333"
-#define MAXCONN 20
-#define MAXDATASIZE 1024
 
 extern SOCKET listenSock;
 
@@ -64,7 +61,7 @@ int startServer(HWND hwnd, int id) {
     freeaddrinfo(res);
 
     /*starting listening for incoming connections*/
-    if ((status = listen(listenSock, MAXCONN)) == SOCKET_ERROR) {
+    if ((status = listen(listenSock, SOMAXCONN)) == SOCKET_ERROR) {
         printf("listen failed with error: %d\n", WSAGetLastError());
         closesocket(listenSock);
         WSACleanup();
@@ -78,11 +75,10 @@ int startServer(HWND hwnd, int id) {
         return 1;
     }
 
-    printf("server: waiting for connections...\n"); 
     return 0;
 }
 
-int acceptConnection(HWND hwnd, int id)
+int acceptConnection(HWND hwnd, int id, char *szDest)
 {
     struct sockaddr_storage their_addr;
     socklen_t sin_size = sizeof their_addr;
@@ -100,7 +96,7 @@ int acceptConnection(HWND hwnd, int id)
     char szBuff[INET_ADDRSTRLEN];
     inet_ntop(their_addr.ss_family,
                 get_in_addr((struct sockaddr *)&their_addr), szBuff, sizeof szBuff);
-        printf("server: got connection from %s\n", szBuff);
+        memcpy(szDest, szBuff, sizeof(szBuff));
 
     closesocket(listenSock);
     return 0;

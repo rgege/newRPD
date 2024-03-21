@@ -19,15 +19,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             {
                 case FD_ACCEPT:
                 {
-                    acceptConnection(hwnd, ID_WINSOCK);
+                    char szDest[16]; // INET_ADDRSTRLEN
+                    char szSBMsg[SB_WIDTH] = "got connection from: ";
+                    acceptConnection(hwnd, ID_WINSOCK, szDest);
+                    strcat(szSBMsg, szDest);
                     HWND hstat = GetDlgItem(hwnd, IDC_STATUS);
-                    SendMessage(hstat, SB_SETTEXT, 0, (LPARAM)"got connection ...");
+                    SendMessage(hstat, SB_SETTEXT, 0, (LPARAM)szSBMsg);
                 }
                 break;
                 case FD_CLOSE:
                 {
                     HWND hstat = GetDlgItem(hwnd, IDC_STATUS);
-                    SendMessage(hstat, SB_SETTEXT, 0, (LPARAM)"connection closed ...");
+                    SendMessage(hstat, SB_SETTEXT, 0, (LPARAM)"connection closed");
                 }
                 break;
             }
@@ -78,6 +81,8 @@ int main()
     HWND hwnd, hstatus;
     MSG Msg;
 
+    FreeConsole();
+
     /*registering windows class*/
     wc.cbSize        = sizeof(WNDCLASSEX);
     wc.style         = 0;
@@ -119,7 +124,7 @@ int main()
         WS_CHILD | WS_VISIBLE, 0, 0, 0, 0,
         hwnd, (HMENU)IDC_STATUS, GetModuleHandle(NULL), NULL);
 
-    int statwidths[] = {200, -1};
+    int statwidths[] = {SB_WIDTH, -1};
     SendMessage(hstatus, SB_SETPARTS, sizeof(statwidths)/sizeof(int), (LPARAM)statwidths);
 
     ShowWindow(hwnd, 1);
