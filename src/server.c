@@ -9,6 +9,7 @@
 #include "server.h"
 
 extern SOCKET listenSock;
+extern SOCKET clientSock;
 
 void *get_in_addr(struct sockaddr *sa)
 {
@@ -74,7 +75,7 @@ int startServer(HWND hwnd, int id) {
         WSACleanup();
         return 1;
     }
-
+    printf("server: waiting for connections on port %s\n", PORT);
     return 0;
 }
 
@@ -84,7 +85,6 @@ int acceptConnection(HWND hwnd, int id, char *szDest)
     socklen_t sin_size = sizeof their_addr;
 
     /*accepting client socket*/
-    SOCKET clientSock = INVALID_SOCKET;
     if ((clientSock = accept(listenSock, (struct sockaddr*)&their_addr, &sin_size)) == INVALID_SOCKET) {
         printf("accept failed with error: %d\n", WSAGetLastError());
         closesocket(listenSock);
@@ -98,6 +98,7 @@ int acceptConnection(HWND hwnd, int id, char *szDest)
                 get_in_addr((struct sockaddr *)&their_addr), szBuff, sizeof szBuff);
         memcpy(szDest, szBuff, sizeof(szBuff));
 
+    printf("server got connection from: %s\n", szBuff);
     closesocket(listenSock);
     return 0;
 }
@@ -122,17 +123,21 @@ int acceptConnection(HWND hwnd, int id, char *szDest)
         }
 
 
-    } while (byte_count > 0);
+    } while (byte_count > 0); */
 
-    /*shutting down the connection
+int shutdownServer(HWND hwnd, int id) {
+
+    /*shutting down the connection*/
+    int status;
     if ((status = shutdown(clientSock, SD_SEND)) == SOCKET_ERROR) {
         printf("shutdown failed with error: %d\n", WSAGetLastError());
         closesocket(clientSock);
         WSACleanup();
         return 1;
     }
-
+    
     printf("server: shutting down...\n");
-
     closesocket(clientSock);
-    WSACleanup(); */
+    WSACleanup();
+    return 0;
+}

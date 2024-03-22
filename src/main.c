@@ -5,6 +5,8 @@
 #include "server.h"
 
 SOCKET listenSock = INVALID_SOCKET;
+SOCKET clientSock = INVALID_SOCKET;
+
 const char g_szClassName[] = "windowClass";
 
 /*window procedure*/
@@ -29,8 +31,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 break;
                 case FD_CLOSE:
                 {
+                    shutdownServer(hwnd, ID_WINSOCK);
                     HWND hstat = GetDlgItem(hwnd, IDC_STATUS);
-                    SendMessage(hstat, SB_SETTEXT, 0, (LPARAM)"connection closed");
+                    SendMessage(hstat, SB_SETTEXT, 0, (LPARAM)"connection closed, shutting down");
                 }
                 break;
             }
@@ -81,7 +84,7 @@ int main()
     HWND hwnd, hstatus;
     MSG Msg;
 
-    FreeConsole();
+    //FreeConsole();
 
     /*registering windows class*/
     wc.cbSize        = sizeof(WNDCLASSEX);
