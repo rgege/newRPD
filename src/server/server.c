@@ -98,7 +98,7 @@ int acceptConnection(HWND hwnd, int id, char *szDest)
                 get_in_addr((struct sockaddr *)&their_addr), szBuff, sizeof szBuff);
         memcpy(szDest, szBuff, sizeof(szBuff));
 
-    printf("server got connection from: %s\n", szBuff);
+    printf("server: got connection from: %s\n", szBuff);
     closesocket(listenSock);
     return 0;
 }

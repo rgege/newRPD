@@ -5,10 +5,11 @@
 #include <ws2tcpip.h>
 #include <stdio.h>
 
-#define BUFLEN 1024
-#define PORT "3333"
+#include "client.h"
 
-int startClient(char *sendBuff)
+extern SOCKET connectSock;
+
+int startClient(HWND hwnd, int id)
 {
     WSADATA wsa;
     int status;
@@ -33,7 +34,6 @@ int startClient(char *sendBuff)
     }
 
     struct addrinfo *ptr = NULL;
-    SOCKET connectSock = INVALID_SOCKET;
     /*attempting to connect until succsess */
     for (ptr = res; ptr != NULL; ptr=ptr->ai_next) {
 
@@ -50,8 +50,6 @@ int startClient(char *sendBuff)
                 connectSock = INVALID_SOCKET;
                 continue;
         }
-        printf("client: connected to server...\n");
-        break;
     }
 
     freeaddrinfo(res);
@@ -61,8 +59,25 @@ int startClient(char *sendBuff)
         WSACleanup();
     }
 
+    if ((status = WSAAsyncSelect(connectSock, hwnd, id, FD_CONNECT | FD_WRITE | FD_READ | FD_CLOSE)) == SOCKET_ERROR) {
+            printf("client: WSAAsyncSelect failed with error: %d\n", WSAGetLastError());
+            closesocket(connectSock);
+            WSACleanup();
+            return -1;
+    }            
+    printf("client: connected to server...\n");
+    return 0;
+}
+
+int sendData(HWND hwnd, int id)
+{
+
     /*sending data to server*/
-    /*const char *sendBuff = "err was here!";*/
+    POINT pt;
+    GetCursorPos(&pt);
+    char sendBuff[MAXDATASIZE];
+    sprintf(sendBuff, "%d::%d\n", pt.x, pt.y);
+    int status;
     if ((status = send(connectSock, sendBuff, (int)sizeof sendBuff, 0)) == SOCKET_ERROR) {
         printf("send failed with error: %d\n", WSAGetLastError());
         closesocket(connectSock);

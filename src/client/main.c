@@ -2,10 +2,9 @@
 #include <commctrl.h>
 #include <stdio.h>
 
-#include "server.h"
+#include "client.h"
 
-SOCKET listenSock = INVALID_SOCKET;
-SOCKET clientSock = INVALID_SOCKET;
+SOCKET connectSock = INVALID_SOCKET;
 
 const char g_szClassName[] = "windowClass";
 
@@ -18,28 +17,21 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         case ID_WINSOCK:
             switch(LOWORD(lParam))
             {
-                case FD_READ:
+                case FD_CONNECT:
                 {
-                    char recvB[MAXDATASIZE];
-                    memset(&recvB, 0, sizeof recvB);
-                    recieveMsg(hwnd, ID_WINSOCK, recvB);
                     HWND hstat = GetDlgItem(hwnd, IDC_STATUS);
-                    SendMessage(hstat, SB_SETTEXT, 1, (LPARAM)recvB);
+                    SendMessage(hstat, SB_SETTEXT, 0, (LPARAM)"connected to host ...");
                 }
                 break;
-                case FD_ACCEPT:
+                case FD_WRITE:
                 {
-                    char szDest[16]; // INET_ADDRSTRLEN
-                    char szSBMsg[SB_WIDTH] = "got connection from: ";
-                    acceptConnection(hwnd, ID_WINSOCK, szDest);
-                    strcat(szSBMsg, szDest);
                     HWND hstat = GetDlgItem(hwnd, IDC_STATUS);
-                    SendMessage(hstat, SB_SETTEXT, 0, (LPARAM)szSBMsg);
+                    SendMessage(hstat, SB_SETTEXT, 0, (LPARAM)"connected to host ...");
+                    
                 }
                 break;
                 case FD_CLOSE:
                 {
-                    shutdownServer(hwnd, ID_WINSOCK);
                     HWND hstat = GetDlgItem(hwnd, IDC_STATUS);
                     SendMessage(hstat, SB_SETTEXT, 0, (LPARAM)"connection closed, shutting down");
                 }
@@ -52,7 +44,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
             hMenu = CreateMenu();
             hSubMenu = CreatePopupMenu();
-            AppendMenu(hSubMenu, MF_STRING | MF_POPUP, ID_FILE_START, "Start");
+            AppendMenu(hSubMenu, MF_STRING | MF_POPUP, ID_FILE_CONN, "Start");
             AppendMenu(hSubMenu, MF_STRING | MF_POPUP, ID_FILE_EXIT, "Exit");
             AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT_PTR)hSubMenu, "File");
             SetMenu(hwnd, hMenu);
@@ -61,12 +53,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         case WM_COMMAND:
             switch(LOWORD(wParam))
             {
-                case ID_FILE_START:
-                {
-                    HWND hstat = GetDlgItem(hwnd, IDC_STATUS);
-                    SendMessage(hstat, SB_SETTEXT, 0, (LPARAM)"waiting for connection ...");
-                    startServer(hwnd, ID_WINSOCK);
-                }
+                case ID_FILE_CONN:
+                    startClient(hwnd, ID_WINSOCK);
                 break;
                 case ID_FILE_EXIT:
                     PostMessage(hwnd, WM_CLOSE, 0, 0);
@@ -119,7 +107,7 @@ int main()
     hwnd = CreateWindowEx(
         WS_EX_CLIENTEDGE,
         g_szClassName,
-        "Server",
+        "Client",
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, 340, 220,
         NULL, NULL, hInstance, NULL);
