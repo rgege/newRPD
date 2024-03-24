@@ -9,3 +9,4 @@
 int startServer(HWND, int);
 int acceptConnection(HWND, int, char*);
 int shutdownServer(HWND, int);
+int recieveMsg (HWND, int, char*);

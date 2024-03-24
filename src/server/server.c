@@ -102,28 +102,28 @@ int acceptConnection(HWND hwnd, int id, char *szDest)
     closesocket(listenSock);
     return 0;
 }
-    /*
+
+int recieveMsg(HWND hwnd, int id, char *rb)
+{
     char recvbuf[MAXDATASIZE];
     int bufsize;
     int recvbuflen = MAXDATASIZE;
     int byte_count = 0;
 
-    do {
-
-        if ((byte_count = recv(clientSock, recvbuf, recvbuflen, 0)) > 0 ) {
-            printf("server: bytes received: %d\n", byte_count);
-        }
-        else if (byte_count == 0)
-            printf("server: connection closing...\n");
-        else {
-            printf("recv failed with error: %d\n", WSAGetLastError());
-            closesocket(clientSock);
-            WSACleanup();
-            return 1;
-        }
-
-
-    } while (byte_count > 0); */
+    if ((byte_count = recv(clientSock, recvbuf, recvbuflen, 0)) > 0 ) {
+       printf("server: bytes received: %d\n", byte_count);
+    }
+    else if (byte_count == 0)
+       printf("server: connection closing...\n");
+    else {
+        printf("recv failed with error: %d\n", WSAGetLastError());
+        closesocket(clientSock);
+        WSACleanup();
+        return -1;
+    }
+    memcpy(rb, recvbuf, recvbuflen);
+    return 0;
+}
 
 int shutdownServer(HWND hwnd, int id) {
 

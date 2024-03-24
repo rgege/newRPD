@@ -2,9 +2,6 @@ message(STATUS "CMake: server")
 
 project(server)
 
-set (CMAKE_C_FLAGS )
-
-
 set(SOURCES
 	server.c
 	main.c
