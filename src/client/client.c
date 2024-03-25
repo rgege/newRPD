@@ -54,10 +54,13 @@ int startClient(HWND hwnd, int id)
 
         /*connecting to server*/
         if ((status = connect(connectSock, ptr->ai_addr, ptr->ai_addrlen)) == SOCKET_ERROR) {
+            if (WSAGetLastError() == WSAEWOULDBLOCK);
+            else {
                 printf("connect failed with error: %d\n", WSAGetLastError());
                 closesocket(connectSock);
                 connectSock = INVALID_SOCKET;
-                continue;
+                return 1;
+            }
         }
     }
 
