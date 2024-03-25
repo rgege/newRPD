@@ -75,16 +75,14 @@ int startClient(HWND hwnd, int id)
     return 0;
 }
 
-int sendData(HWND hwnd)
+int sendData(HWND hwnd, char *sb)
 {
-
+    char sendBuf[MAXDATASIZE];
+    memcpy(sendBuf, sb, sizeof sendBuf);
+     
     /*sending data to server*/
-    POINT pt;
-    GetCursorPos(&pt);
-    char sendBuff[MAXDATASIZE];
-    sprintf(sendBuff, "%d::%d\n", pt.x, pt.y);
     int status;
-    if ((status = send(connectSock, sendBuff, (int)sizeof sendBuff, 0)) == SOCKET_ERROR) {
+    if ((status = send(connectSock, sendBuf, (int)sizeof sendBuf, 0)) == SOCKET_ERROR) {
         printf("send failed with error: %d\n", WSAGetLastError());
         closesocket(connectSock);
         WSACleanup();

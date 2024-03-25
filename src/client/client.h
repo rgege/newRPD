@@ -9,5 +9,5 @@
 #define SB_WIDTH       200
 
 int startClient(HWND, int);
-int sendData(HWND);
+int sendData(HWND, char *);
 int shutdownClient(HWND);

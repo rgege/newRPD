@@ -10,6 +10,17 @@ SOCKET connectSock = INVALID_SOCKET;
 
 const char g_szClassName[] = "windowClass";
 
+int sendMouseLoc(HWND hwnd)
+{
+    char sb[MAXDATASIZE];
+    POINT p;
+    GetCursorPos(&p);
+    sprintf(sb, "%d::%d\n", p.x, p.y);
+    sendData(hwnd, sb);
+    return 0;
+}
+
+
 /*window procedure*/
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -40,7 +51,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
         case WM_TIMER:
         {
-            sendData(hwnd);
+            sendMouseLoc(hwnd);
         }
         break;
 
