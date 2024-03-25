@@ -44,8 +44,17 @@ int startClient(HWND hwnd, int id)
             WSACleanup();
         }
 
+        /*making the socket asynchronous*/ 
+        if ((status = WSAAsyncSelect(connectSock, hwnd, id, FD_WRITE|FD_CLOSE|FD_CONNECT)) == SOCKET_ERROR) {
+            printf("WSAAsyncSelect failed with error: %d\n", WSAGetLastError());
+            closesocket(connectSock);
+            WSACleanup();
+            return 1;
+        }
+
         /*connecting to server*/
         if ((status = connect(connectSock, ptr->ai_addr, ptr->ai_addrlen)) == SOCKET_ERROR) {
+                printf("connect failed with error: %d\n", WSAGetLastError());
                 closesocket(connectSock);
                 connectSock = INVALID_SOCKET;
                 continue;
@@ -59,17 +68,11 @@ int startClient(HWND hwnd, int id)
         WSACleanup();
     }
 
-    if ((status = WSAAsyncSelect(connectSock, hwnd, id, FD_CONNECT | FD_WRITE | FD_READ | FD_CLOSE)) == SOCKET_ERROR) {
-            printf("client: WSAAsyncSelect failed with error: %d\n", WSAGetLastError());
-            closesocket(connectSock);
-            WSACleanup();
-            return -1;
-    }            
     printf("client: connected to server...\n");
     return 0;
 }
 
-int sendData(HWND hwnd, int id)
+int sendData(HWND hwnd)
 {
 
     /*sending data to server*/
@@ -86,7 +89,12 @@ int sendData(HWND hwnd, int id)
     }
         
     printf("client: sending data...\n");
+    return 0;
+}
 
+int shutdownClient(HWND hwnd)
+{
+    int status;
     if ((status = shutdown(connectSock, SD_SEND)) == SOCKET_ERROR) {
         printf("shutdown failed with error: %d\n", WSAGetLastError());
         closesocket(connectSock);

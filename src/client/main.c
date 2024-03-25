@@ -11,7 +11,6 @@ const char g_szClassName[] = "windowClass";
 /*window procedure*/
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    
     switch(msg)
     {
         case ID_WINSOCK:
@@ -20,24 +19,27 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 case FD_CONNECT:
                 {
                     HWND hstat = GetDlgItem(hwnd, IDC_STATUS);
-                    SendMessage(hstat, SB_SETTEXT, 0, (LPARAM)"connected to host ...");
+                    SendMessage(hstat, SB_SETTEXT, 0, (LPARAM)"connected to server ...");
                 }
-                break;
+                break; 
                 case FD_WRITE:
                 {
                     HWND hstat = GetDlgItem(hwnd, IDC_STATUS);
-                    SendMessage(hstat, SB_SETTEXT, 0, (LPARAM)"connected to host ...");
-                    
+                    SendMessage(hstat, SB_SETTEXT, 1, (LPARAM)"ready to send ...");
+                    sendData(hwnd);
+
                 }
                 break;
                 case FD_CLOSE:
                 {
+                    shutdownClient(hwnd);
                     HWND hstat = GetDlgItem(hwnd, IDC_STATUS);
                     SendMessage(hstat, SB_SETTEXT, 0, (LPARAM)"connection closed, shutting down");
                 }
                 break;
             }
         break;
+
         case WM_CREATE:
         {
             HMENU hMenu, hSubMenu;
