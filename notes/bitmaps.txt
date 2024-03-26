@@ -1,0 +1,155 @@
+Basics
+--------------------------------------------------------------------------
+A bitmap is a two-dimensional rectangular array of bits that correspond 
+to the pixel of an image.
+
+--monochrome bitmaps require one bit per pixel
+--color bitmaps, multiple bits per pixel
+
+Bitmaps represents one of two methods for storing pictorial info.
+Other is the metafile.
+
+bitmaps corespond to raster graphics (treats output devices in terms of
+discrete pixels) (most devices are raster)
+
+*copying a bitmap to a video display is faster than rendering metafiles.
+
+
+Bitap Dimensions
+--------------------------------------------------------------------------
+A bitmap is rectangular and has a spatial dimension, which is the width 
+and height of the image in pixels.
+
+width x heigth:
+  9   x   6   =   54 pixels
+
+the spatial dimensions of a bitmap are often reffered to as its
+resolution (preferred definition: pixels per metrical unit)  300 dpi
+
+bitmaps are rectangular but computer memory is linear, bitmaps stored by
+rows beggining with a top row ending with a bottom.
+
+
+Color and Bitmaps
+--------------------------------------------------------------------------
+bitmaps also have a color dimension (number of bits required for each
+pixel (bpp) ) 
+
+The number of possible colors: 2^(bit-count) 
+
+
+The Bit-Block Transfer
+--------------------------------------------------------------------------
+*video display as one big bitmap! The pixels on the screen are represented by bits stored in memory on the video display adapter board.
+
+Bitblt(bit blit) bit-block transfer
+function is a pixel mover (raster blaster). Function performs bitwise 
+operation on pixels and can result is some interesting effects.
+
+/* BitBlt(hdcDst, xDst, yDst, cx, cy, hdcSrc, xSrc, ySrc, dwROP); */
+
+transfers pixels from rectangular area in one divice context called
+source, to the rectangular area of the same size in another divice context
+called destination.
+
+
+Stretching the BitMap
+--------------------------------------------------------------------------
+
+/* StretchBlt (hdcDst, xDst, yDst, cxDst, cyDst,
+               hdcSrc, xSrc, ySrc, cxSrc, cySrc, dwROP); */
+
+adds two arguments (separate widths and heights of the dest and source)
+
+
+The Pattern Block Transfer
+--------------------------------------------------------------------------
+PatBlt (pattern block transfer) uses only dest DC
+
+/* PatBlt(hdc, x, y, cx, cy, dwROP); */
+
+x,y specifies the upper left corner of a rectangle
+rectangle is cx units wide and cy units high
+this is the rect are that PatBlt alters.
+
+
+logical operations is determined by dwROP argument
+
+
+The GDI Bitmap Object
+--------------------------------------------------------------------------
+Two type DDB (device dependent) and DIB (device independent)
+
+Creating DDB
+------------
+graphics objects are stored internally in the GDI module
+ans reffered to by application programs with numerical handles
+
+(storring a handle to DDB in a var of type HBITMAP)
+
+/* HBITMAP hBitmap; */
+
+then obtain the handle by calling on of the DDB-creation func:
+
+CreateBitmap() - allocate and initialize some memory in GDI memory to
+store info about the bitmap as well as the actual bitmap bits. 
+The application progrm does not have direct access ti this memory.
+
+When finished using the bitmap, it should be deleted
+
+/* hBitmap = CreateBitmap(cx, cy, cPlanes, cBitsPixel, bit);
+DeleteObject(hBitMap); */
+
+--CreateBitmap func:
+cx, cy : width and height of the bitmap in pixels,
+cPlanes : number of color planes,
+cBitPixel : number of bits per pixel,
+bit : points to an array of bits (specified color format).
+
+**real usage:
+hBitmap = createCompatibleBitmap(hdc, cx, cy);
+
+creates a bitmapcompaitble with the device whose device context
+handle is given.
+
+** bitmap structure of type BITMAP
+
+typedef struct _tagBITMAP
+{
+    LONG bmType;        // set to 0
+    LONG bmWidth;       // width in pixels
+    LONG bmHeight;      // height in pixels
+    LONG bmWidthBytes;  // width of row in bytes
+    WORD bmPlanes;      // number of color planes
+    WORD bmBitsPixel;   // number of bits per pixel
+    LPVOID bmBits;      // pointer to pixel bits
+}
+BITMAP, * PBITMAP;
+
+
+The Memory Device Context
+--------------------------------------------------------------------------
+normally, a device context refers to a particular graphics output device
+(such as video display or a printer) together with its device driver.
+
+A memory device context exist only in memory (compatible with a real
+device).
+
+to create a memoy device context you must have a device context handle
+
+hdcMem = CreateCompatibleDC(hdc);
+
+** if argument is NULL Win will create a HDCMEM compatible with the
+video display.
+
+you can't do much with a 1-bit display surface -> need to make it larger
+by selecting GDI bitmap object into th memory device context:
+
+SelectObject(hdcMem, hBitmap);
+
+you can do anything with this memory device context that you can do with 
+a real device contect.
+
+
+Loading Bitmap Resources
+--------------------------------------------------------------------------
