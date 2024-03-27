@@ -1,0 +1,85 @@
+THE DIB File Format
+---------------------------------------------------------------------------
+DIB files has the extension .BMP
+
+A program can load a DIB file, minus the first 14 bytes, into a contiguos
+block of memory. Programs also have complete access to the contents of the 
+DIB and can modify the DIB in whatever way they choose.
+
+
+OS/2 STYLE DIB
+---------------------------------------------------------------------------
+DIB file has four main sections:
+
+    -- A file header
+    -- An information header
+    -- An RGB color table
+    -- The bitmap pixel bits
+
+A DIB file begins with 14-byte file header
+
+typedef struct tagBITMAPFILEHEADER // bmfh
+{
+    WORD bfType;         // signature word "BM" or 0x4D42
+    DWORD bfSize;        // entire size of file
+    WORD bfReserved1;    // must be zero
+    WORD bfReserved2;    // must be zero
+    DWORD bfOffsetBits;  // offset in file of DIB pixel bits
+}
+BITMAPFILEHEADER, * PBITMAPFILEHEADER ;
+
+In the OS/2−style DIB, the BITMAPFILEHEADER structure is followed 
+immediately by a BITMAPCOREHEADER structure, which provides the basic
+information about the DIB image:
+
+typedef struct tagBITMAPCOREHEADER // bmch
+{
+    DWORD bcSize;    // size of the structure = 12
+    WORD bcWidth;    // width of image in pixels
+    WORD bcHeight;   // height of image in pixels
+    WORD bcPlanes;   // = 1
+    WORD bcBitCount; // bits per pixel (1, 4, 8, or 24)
+}
+BITMAPCOREHEADER, * PBITMAPCOREHEADER;
+
+
+The BITMAPCOREHEADR is followed by the color table
+(does not exist for 24-bit DIB).
+
+
+typedef struct tagRGBTRIPLE // rgbt
+{
+    BYTE rgbtBlue;  // blue level
+    BYTE rgbtGreen; // green level
+    BYTE rgbtRed;   // red level
+}
+RGBTRIPLE;
+
+The data that follow the color table (and what follows the information 
+header for DIBs with a bit count of 24) are the pixel bits themselves.
+
+
+Bottoms Up!
+---------------------------------------------------------------------------
+Like most bitmaps formats the pixel bits in the DIB are organized in the 
+horizontal rows, called "scan lines".
+
+The number of rows is equal to the bcHeight field of the BITMAPCOREHEADER.
+
+--BID begins with the bottom row of the image!.
+
+
+The DIB Pixel Bits
+---------------------------------------------------------------------------
+The last section of the DIB file consists of the actual DIB pixel bits
+(organized in horizonta rows).
+
+The number of rows in a DIB is equal to the bcHeight field, each row 
+encodes a number of pixels equal to the bcWidth field of the structure.
+The number os bits per pixel is obtained from bcBitCount field (1,4,8,24).
+
+The length of each row in bytes is always a multiple of 4.
+RowLength = 4 * ((bmch.bcWidth * bmchcmBitCount + 31) / 32);
+
+The row is padded at the right (zeros), if necessary, to achieve this 
+length. The totoal number of bytes of pixel data is equal to the product of RowLength and bmch.bcHeight.

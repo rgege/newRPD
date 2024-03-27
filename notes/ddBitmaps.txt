@@ -40,7 +40,8 @@ The number of possible colors: 2^(bit-count)
 
 The Bit-Block Transfer
 --------------------------------------------------------------------------
-*video display as one big bitmap! The pixels on the screen are represented by bits stored in memory on the video display adapter board.
+*video display as one big bitmap! The pixels on the screen are represented
+ by bits stored in memory on the video display adapter board.
 
 Bitblt(bit blit) bit-block transfer
 function is a pixel mover (raster blaster). Function performs bitwise 
